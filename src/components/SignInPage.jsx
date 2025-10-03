@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import SignInBackground from "./assets/SignInBackground.PNG"
 import SignUpBackground from "./assets/SignUpBackground.PNG"
 
