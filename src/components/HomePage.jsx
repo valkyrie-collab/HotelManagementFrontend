@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import search from "./assets/search.svg"
 
 function HomePage() {
     const [hotels, setHotels] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [decode, setDecode] = useState(null);
+    const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
     const handleSearchHotel = (event) => {
@@ -32,8 +36,34 @@ function HomePage() {
         fetchHotelList();
     }
 
+    const handleSignPageOrUserProfile = (event) => {
+
+        if (event === "sign") {
+            navigate("/sign-page")
+        } else {
+            navigate(`/user-profile`)
+        }
+
+    }
+
+    const handleAdminNavigation = () => {
+        navigate("/admin-page");
+    }
+
     useEffect(
         () => {
+            // localStorage.clear();
+            console.log("the token is: ",token);
+            if (token !== null) {
+                const data = jwtDecode(token)
+                setDecode(data);
+                console.log("the decoded token is", data);
+
+                if (data.roles[0] === "ROLE_ADMIN") {
+                    setIsAdmin(true);
+                }
+
+            }
             const fetchHotels = async () => {
 
                 const response = await fetch(`http://localhost:8080/catalog/get-hotels`, 
@@ -55,7 +85,7 @@ function HomePage() {
 
             fetchHotels();
         },
-    []);
+    [token]);
 
     const handleHotelDetails = (hotelId) => {
         // console.log("navigating to the hotel show page");
@@ -88,13 +118,45 @@ function HomePage() {
                                 focus:outline-none focus:ring-1 focus:ring-amber-600 rounded-tr-xl rounded-br-xl backdrop-blur-lg"
                         />
                     </a>
-                    <a>
-                        <span
-                            className="ml-5 h-10 w-10 p-2 border border-amber-600 rounded-xl text-amber-700 bg-amber-700/15 backdrop-blur-lg"
+                        {token !== null && decode ? (
+                        <a
+                            onClick={() => handleSignPageOrUserProfile("profile")}
                         >
-                            SignIn/SignUp
-                        </span>
-                    </a>
+                            <span
+                                className="ml-5 h-10 w-10 pl-3 pt-2 pb-2 pr-3 border border-amber-600 rounded-2xl text-amber-700 
+                                    bg-amber-700/15 backdrop-blur-lg cursor-pointer"
+                            >
+                            {decode.sub.charAt(0)}
+                            </span>
+                        </a>
+                        ) : (
+                        <a
+                            onClick={() => handleSignPageOrUserProfile("sign")}
+                        >
+                            <span
+                                className="ml-5 h-10 w-10 p-2 border border-amber-600 rounded-xl text-amber-700 
+                                    bg-amber-700/15 backdrop-blur-lg cursor-pointer"
+                            >
+                                Sign-In/Sign-Up
+                            </span>
+                        </a>
+                        )}
+                    {token !== null && isAdmin && (
+                        <a
+                            onClick={handleAdminNavigation}
+                        >
+                            <div 
+                                className="rounded-3xl bg-red-500/15 backdrop-blur-lg border border-red-500/30 shadow-2xl
+                                    focus:outline-none focus:ring-1 focus:ring-red-600/50 hover:bg-red-500/25 p-2 ml-5 cursor-pointer"
+                            >
+                                <span
+                                    className="text-red-600 font-bold text-xl"
+                                >
+                                    Admin
+                                </span>
+                            </div>
+                        </a>
+                    )}
                 </div>
             </header>
             <main

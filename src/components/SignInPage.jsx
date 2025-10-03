@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {gsap} from "gsap"
 import SignInBackground from "./assets/SignInBackground.PNG"
 import SignUpBackground from "./assets/SignUpBackground.PNG"
@@ -11,6 +12,7 @@ function SignInPage() {
     const signUpDivRef = useRef(null);
     const signUpBackgroundImage = useRef(null);
     const signInBackgroundImage = useRef(null);
+    const navigate = useNavigate();
     // useEffect(
     //     () => {
     //         console.log(signUp);
@@ -57,9 +59,10 @@ function SignInPage() {
 
             if (response.ok) {
                 const data = await response.text();
-                // console.log(data);
+                console.log(data);
                 localStorage.setItem("token", data);
                 alert("sign in successful");
+                navigate("/")
             } else {
                 // console.log("server not working")
                 alert("sign in unsuccessful try again")
