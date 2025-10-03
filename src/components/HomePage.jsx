@@ -7,6 +7,7 @@ function HomePage() {
     const navigate = useNavigate();
 
     const handleSearchHotel = (event) => {
+        setHotels([]);
         const value = btoa(event.target.value);
         console.log(value);
 
