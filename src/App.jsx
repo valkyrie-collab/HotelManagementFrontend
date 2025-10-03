@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import SignInPage from './components/SignInPage';
+import Testing from './components/Testing'
 
 function App() {
   

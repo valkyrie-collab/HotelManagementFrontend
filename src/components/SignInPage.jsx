@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import {gsap} from "gsap"
 import SignInBackground from "./assets/SignInBackground.PNG"
 import SignUpBackground from "./assets/SignUpBackground.PNG"
 
@@ -6,6 +7,10 @@ function SignInPage() {
     const [signUp, setSignUp] = useState(false);
     const signInFormRef = useRef(null);
     const signUpFormRef = useRef(null);
+    const signInDivRef = useRef(null);
+    const signUpDivRef = useRef(null);
+    const signUpBackgroundImage = useRef(null);
+    const signInBackgroundImage = useRef(null);
     // useEffect(
     //     () => {
     //         console.log(signUp);
@@ -105,6 +110,25 @@ function SignInPage() {
         fetchSave();
     }
 
+    useEffect(
+        () => {
+            gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
+            gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
+        },
+    []);
+
+    useEffect(
+        () => {
+            if (signUp) {
+                gsap.to(signUpDivRef.current,{x: "-108%", ease: "power2.out"})
+                gsap.to(signUpBackgroundImage.current,{x: "92%", ease: "power2.out"})
+            } else {
+                gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
+                gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
+            }
+        }
+    , [signUp]);
+
     return (
         <section className="flex items-center justify-center h-screen w-screen 
             bg-[url('./components/assets/background.png')] bg-cover">
@@ -115,7 +139,14 @@ function SignInPage() {
                     //This div below contains Sign Up
                     <div className="flex flex-row items-center justify-center">
 
-                        <div className="rounded-2xl bg-white/15 backdrop-blur-lg border 
+                        <div ref={signUpBackgroundImage} className=" relative ">
+                            <img 
+                                src={SignUpBackground} 
+                                className="w-7xl rounded-xl" 
+                            />
+                        </div>
+
+                        <div ref={signUpDivRef} className="rounded-2xl bg-white/15 backdrop-blur-lg border relative
                             border-white/30 shadow-xl pl-5 pr-8 pt-6 pb-9 flex flex-col items-center">
                                 
                             <h2 className="text-amber-600 text-2xl pb-5 font-bold text-center">Sign-in</h2>
@@ -175,26 +206,19 @@ function SignInPage() {
                             </p>
 
                         </div>
-
-                        <div>
-                            <img 
-                                src={SignUpBackground} 
-                                className="w-7xl rounded-xl" 
-                            />
-                        </div>
                         
                     </div>
                 ) : (
                     // This div (below) contains Sign In 
                     <div className="flex flex-row items-center justify-center">
-                        <div>
+                        <div ref={signInBackgroundImage} className=" relative ">
                             <img 
                                 src={SignInBackground} 
                                 className="w-[93%] rounded-xl" 
                             />
                         </div>
 
-                        <div className="rounded-2xl bg-white/15 backdrop-blur-lg border 
+                        <div ref={signInDivRef} className="rounded-2xl bg-white/15 backdrop-blur-lg border relative
                             border-white/30 shadow-xl pl-5 pr-8 pt-8 pb-11 flex flex-col items-center">
                                 
                             <h2 className="text-amber-600 text-2xl pb-5 font-bold text-center">Sign-in</h2>
