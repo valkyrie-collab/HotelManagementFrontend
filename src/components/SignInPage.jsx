@@ -61,7 +61,7 @@ function SignInPage() {
                 localStorage.setItem("token", data);
                 alert("sign in successful");
             } else {
-                console.log("server not working")
+                // console.log("server not working")
                 alert("sign in unsuccessful try again")
             }
 
