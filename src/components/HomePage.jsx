@@ -61,6 +61,7 @@ function HomePage() {
                 console.log("the decoded token is", data);
 
                 if (data.iat === data.exp) {
+                    localStorage.clear();
                     setIsExpired(true);
                 }
 
