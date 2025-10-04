@@ -1,39 +1,117 @@
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
-import hotelImage from './assets/hotel.webp'
+import { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+// import hotelImage from './assets/hotel.webp'
 
 function HotelDetailPage() {
     const {hotelId} = useParams();
-    const hotel = {id: 0, name: "hotel0", description: "Kid vs. Kat (stylized KiD vs KaT) is a " +
-        "Canadian animated television series that originally aired on YTV in Canada from October 25," + 
-        " 2008, until June 4, 2011. The series was created and co-directed by Rob Boutilier, developed" + 
-        " and produced at Studio B Productions (a subsidiary of DHX Media, now WildBrain), in " + 
-        "ssociation with YTV and Jetix Europe (later rebranded as Disney XD for its second season) 52 episodes were produced."}
-    const hotelImages = [hotelImage, hotelImage, hotelImage, hotelImage, hotelImage];
+    const [hotel, setHotel] = useState(null);
+    const token = localStorage.getItem("token");
+    const navigate = useNavigate();
+    const count = useRef(0);
+    // const hotelImages = [hotelImage, hotelImage];
     
     useEffect(
         () => {
             console.log(hotelId);
+            const fetchHotelData = async () => {
+                const response = await fetch(`http://localhost:8080/catalog/search-hotel-by-id?id=${hotelId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type":"application/json",
+                        "Authorization":`Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data.imageDTOs);
+                    if (count.current === 0) {
+                        alert("hotel found successfully");
+                        count.current = 1;
+                    }
+                    setHotel(data);
+                } else {
+                    console.log("hotel not found")
+                    alert("No hotel found");
+                    return;
+                }
+
+            }
+
+            fetchHotelData();
         },
-    [hotelId]);
+    [hotelId, token]);
+
+    const handleSaveContact = () => {
+        console.log(hotel.contact);
+
+        const doSaveClipboard = async () => {
+
+            try {
+                await navigator.clipboard.writeText(hotel.contact);
+                alert(`Phone number saved to clipboard: ${hotel.contact}`);
+            } catch (err) {
+                console.log("not saved to clipboard", err);
+            }
+
+        }
+
+        doSaveClipboard();
+    }
+
+    const handleRoomNavigation = () => {
+        navigate(`/room-service/${hotelId}`);
+    }
 
     return (
         <section
             className="h-screen w-screen bg-[url('./components/assets/HomePageBackground.png')]
                 flex flex-row items-center justify-center bg-cover p-5"
-        >
+        >  
             <div
                 className="rounded-xl bg-white/15 backdrop-blur-lg border border-white/30
-                    shadow-xl p-5 max-w-xl h-3/4 mr-1.5"
+                    shadow-xl p-5 max-w-xl h-3/4 mr-1.5 mb-1"
             >
                 <h1
                     className="text-amber-600 text-center font-bold"
                 >
-                    {hotel.name}
+                    {hotel && hotel.name}
                 </h1>
-                <p>
-                    description: {hotel.description}
-                </p>
+                {/* Item-start will do the text as we write in exam main thing under ther is gap */}
+                <div className="flex flex-row items-start gap-2 mt-1 mb-1">
+                    <p className="text-xl text-amber-800 font-bold">
+                        Description:
+                    </p>
+                    <p className="pt-1">
+                        {hotel && hotel.description} hello world my name is rajarshi 
+                        biswas i am testing you to do this in the compouter react application 
+                        tot set this good frontend projec t
+                    </p>
+                </div>
+                <div className="flex flex-row items-start gap-2 mt-1 mb-1">
+                    <p className="text-amber-800 font-bold text-xl">
+                        Address:
+                    </p>
+                    <p className="pt-1">
+                        {hotel && hotel.address}
+                    </p>
+                </div>
+                <div className="flex flex-row items-start gap-2 mt-1 mb-1">
+                    <p className="text-amber-800 font-bold text-xl">
+                        CheckIn:
+                    </p>
+                    <p className="text-black font-bold pt-1">
+                        {hotel && new Date(hotel.checkIn).toLocaleString()}
+                    </p>
+                </div>
+                <div className="flex flex-row items-start gap-2 mt-1 mb-1">
+                    <p className="text-amber-800 font-bold text-xl">
+                        CheckOut:
+                    </p>
+                    <p className="text-black font-bold pt-1">
+                        {hotel && new Date(hotel.checkOut).toLocaleString()}
+                    </p>
+                </div>
             </div>
             <div className="ml-1.5">
                 <div
@@ -41,11 +119,12 @@ function HotelDetailPage() {
                         border-white/30 shadow-xl p-5 max-w-2xl mb-3 overflow-x-auto whitespace-nowrap
                         scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >   
-                    {hotelImages.map((image) => (
-                        <img 
-                        src={image} 
-                        alt="hotelImage" 
-                        className="rounded-xl w-3/8 h-3/8"
+                    {hotel && hotel.imageDTOs && hotel.imageDTOs.map((image, index) => (
+                        <img
+                            key={index} 
+                            src={`data:${image.type};base64,${image.data}`} 
+                            alt={image.name}
+                            className="rounded-xl w-3/8 h-3/8"
                     />
                     )
                 )}
@@ -68,6 +147,18 @@ function HotelDetailPage() {
                         </a>
 
                         <a
+                            onClick={handleRoomNavigation}
+                            className="rounded-2xl bg-green-500/15 backdrop-blur-lg border
+                                border-green-600/30 shadow-xl p-2 cursor-pointer hover:bg-green-500/30
+                                transition duration-300 ease-in-out "
+                        >
+                            <span className="ml-2 mr-2 text-green-600 font-bold">
+                                show-room
+                            </span>
+                        </a>
+
+                        <a  
+                            onClick={handleSaveContact}
                             className="rounded-2xl bg-green-500/15 backdrop-blur-lg border
                                 border-green-600/30 shadow-xl p-2 cursor-pointer hover:bg-green-500/30
                                 transition duration-300 ease-in-out "
