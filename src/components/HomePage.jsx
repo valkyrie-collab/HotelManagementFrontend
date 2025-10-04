@@ -7,6 +7,7 @@ function HomePage() {
     const [hotels, setHotels] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [decode, setDecode] = useState(null);
+    const [isExpired, setIsExpired] = useState(false);
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
@@ -58,6 +59,10 @@ function HomePage() {
                 const data = jwtDecode(token)
                 setDecode(data);
                 console.log("the decoded token is", data);
+
+                if (data.iat === data.exp) {
+                    setIsExpired(true);
+                }
 
                 if (data.roles[0] === "ROLE_ADMIN") {
                     setIsAdmin(true);
@@ -118,7 +123,7 @@ function HomePage() {
                                 focus:outline-none focus:ring-1 focus:ring-amber-600 rounded-tr-xl rounded-br-xl backdrop-blur-lg"
                         />
                     </a>
-                        {token !== null && decode ? (
+                        {token !== null && !isExpired && decode ? (
                         <a
                             onClick={() => handleSignPageOrUserProfile("profile")}
                         >
