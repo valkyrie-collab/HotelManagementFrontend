@@ -171,7 +171,7 @@ function HomePage() {
                 {
                     hotels.length > 0? (
                         <div className=" grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 p-4
-                            max-h-[490px] overflow-y-auto">
+                            max-h-[490px] overflow-y-auto rounded-xl">
                             {
                                 hotels.map((hotel, index) => (
                                     <div 
