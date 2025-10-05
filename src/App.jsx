@@ -4,6 +4,7 @@ import HomePage from './components/HomePage'
 import HotelDetailPage from './components/HotelDetailPage';
 import UserProfilePage from './components/UserProfilePage';
 import AdminPage from './components/AdminPage';
+import RoomPage from './components/RoomPage';
 import Testing from './components/Testing'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path='/sign-page' element={<SignInPage/>}/>
         <Route path='/user-profile' element={<UserProfilePage/>}/>
         <Route path='/admin-page' element={<AdminPage/>}/>
+        <Route path='/room-service/:hotelId' element={<RoomPage/>}/>
       </Routes>
     </Router>
   );
