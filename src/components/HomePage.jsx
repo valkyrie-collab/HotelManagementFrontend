@@ -60,7 +60,10 @@ function HomePage() {
                 setDecode(data);
                 console.log("the decoded token is", data);
 
-                if (new Date() >= new Date(data.exp)) {
+                if (new Date() >= new Date(data.exp * 1000)) {
+                    console.log("token is deleted");
+                    console.log("New date", new Date());
+                    console.log("expiration date", new Date(data.exp));
                     localStorage.clear();
                     setIsExpired(true);
                 }
@@ -180,33 +183,37 @@ function HomePage() {
                                             backdrop-blur-lg border border-white/30 shadow-xl"
                                     >
                                         <h2
-                                            className="text-amber-500 font-bold text-2xl"
+                                            className="text-amber-500 flex items-start font-bold text-2xl"
                                         >
                                             {hotel.name}
                                         </h2>
-                                        <p>
-                                            Disclaimer: {hotel.description}
-                                        </p>
                                         <div
-                                            className="flex flex-row items-center justify-center"
-                                        >   
-                                            <div className="flex flex-col gap-2 pr-1.5">
-                                                <p>
-                                                    check-in
-                                                </p>
-                                                <p>
-                                                    {new Date(hotel.checkIn).toLocaleString()}
-                                                </p>
-                                            </div>
-                                            
-                                            <div className="flex flex-col gap-2 pl-1.5">
-                                                <p>
-                                                    check-out
-                                                </p>
-                                                <p>
-                                                    {new Date(hotel.checkOut).toLocaleString()}
-                                                </p>
-                                            </div>
+                                            className="flex flex-row gap-2"
+                                        >
+                                            <h2
+                                                className="text-lg text-amber-500 font-bold"
+                                            >
+                                                Disclaimer: 
+                                            </h2>
+                                            <p
+                                                className="pt-1"
+                                            >
+                                                {hotel.description} qwerty uiopas dfghjklz xcvbn m qwertyu i qwerty uiopas dfghjklz xcvbn m qwertyu i
+                                            </p>
+                                        </div>
+                                        <div
+                                            className="flex flex-row gap-6 mt-2 mb-2"
+                                        >
+                                            <h2
+                                                className="text-lg text-amber-500 font-bold"
+                                            >
+                                                Address: 
+                                            </h2>
+                                            <p
+                                                className="pt-1"
+                                            >
+                                                {hotel.address} qwerty uiopas dfghjklz xcvbn m qwertyu i qwerty uiopas dfghjklz xcvbn m qwertyu i
+                                            </p>
                                         </div>
                                         <a
                                             onClick={() => handleHotelDetails(hotel.id)}
