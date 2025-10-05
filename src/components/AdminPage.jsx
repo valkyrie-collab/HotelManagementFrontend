@@ -1,15 +1,24 @@
 import { useRef, useState } from "react";
 
 function AdminPage() {
-    const [isAddHotel, setIsAddHotel] = useState(false);
+    const [isAddHotelVisible, setIsAddHotelVisible] = useState(false);
+    const [isAddHotelActive, setIsAddHotelActive] = useState(false);
     const [isAddRoom, setIsAddRoom] = useState(false);
     const [hotelImages, setHotelImages] = useState([]);
     const doReference = useRef(null);
     const token = localStorage.getItem("token");
 
     const handleAddHotel = () => {
-        setIsAddHotel(!isAddHotel);
+    if (!isAddHotelVisible) {
+      // Show form
+      setIsAddHotelActive(true);
+      setTimeout(() => setIsAddHotelVisible(true), 50);
+    } else {
+      // Hide form
+      setIsAddHotelVisible(false);
+      setTimeout(() => setIsAddHotelActive(false), 300); // Match Tailwind duration
     }
+  };
 
     const handleAddRooms = () => {
         setIsAddRoom(!isAddRoom);
@@ -124,12 +133,15 @@ function AdminPage() {
             <main
                 className="flex justify-center p-10"
             >
-                {isAddHotel && (
+                {isAddHotelActive && (
                     <form
                         ref={doReference}
                         onSubmit={handleHotelData}
-                        className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 max-w-4/5
-                            p-5 flex flex-row gap-4"
+                        className={`transform transition-all duration-300 ease-in-out ${
+                            isAddHotelVisible? 'opacity-100 scale-100 pointer-events-auto'
+                                : 'opacity-0 scale-95 pointer-events-none'
+                            } rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 max-w-4/5
+                            p-5 flex flex-row gap-4`}
                     >
                         <div
                             className="rounded-xl bg-red-500/15 backdrop-blur-lg border border-red-600/30 
