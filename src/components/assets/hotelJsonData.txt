@@ -24,3 +24,7 @@
     "roomDTOs": null,
     "rateDTOs": null
 }
+
+roomNumber; description;
+childrenNumber; beds; name;
+adultNumber; price;
