@@ -5,6 +5,10 @@ function AdminPage() {
     const [isAddHotelActive, setIsAddHotelActive] = useState(false);
     const [isAddRoomVisible, setIsAddRoomVisible] = useState(false);
     const [isAddRoomActive, setIsAddRoomActive] = useState(false);
+    const [isRemoveHotelVisible, setIsRemoveHotelVisible] = useState(false);
+    const [isRemoveRoomVisible, setIsRemoveRoomVisible] = useState(false);
+    const [isRemoveAllRoomVisible, setIsRemoveAllRoomVisible] = useState(false);
+    const [isRemoveHotelRoomVisible, setIsRemoveHotelRoomVisible] = useState(false);
     const [roomData, setRoomData] = useState({
         roomNumber: "", description: "", childrenNumber: "",
         beds: "", name: "", adultNumber: "", price: "", hotelId: ""
@@ -15,9 +19,15 @@ function AdminPage() {
     });
     const [roomImages, setRoomImages] = useState([]);
     const [hotelImages, setHotelImages] = useState([]);
+    const [removeData, setRemoveData] = useState(
+        {hotelId: "", roomNumber: ""}
+    );
     const doReference = useRef(null);
     const doRoomReference = useRef(null);
     const token = localStorage.getItem("token");
+    const doRemoveRoomReference = useRef(null);
+    const doRemoveHotelReference = useRef(null);
+    const doRemoveAllRoomReference = useRef(null);
 
     const handleAddHotel = () => {
 
@@ -183,16 +193,149 @@ function AdminPage() {
             setRoomImages([]);
             const fileInput = document.querySelector('input[type="file"][placeholder="Room Images"]');
             if (fileInput) fileInput.value = '';
-        } else {
+        } else if (whichForm === "hotel") {
             setHotelData({
                 name: "", brand: "", description: "", address: "",
                 contact: ""
             });
             setHotelImages([]);
-            const fileInput = document.querySelector('input[type="file"][placeholder="Room Images"]');
+            const fileInput = document.querySelector('input[type="file"][placeholder="Hotel Images"]');
             if (fileInput) fileInput.value = '';
+        } else {
+            setRemoveData({hotelId: "", roomNumber: ""})
         }
 
+    }
+
+    const handleRemoveReference = () => {
+        
+        if (doRemoveRoomReference.current) {
+            doRemoveRoomReference.current.requestSubmit();
+        }
+
+    }
+
+    const handleRemoveHotelReference = () => {
+
+        if (doRemoveHotelReference.current) {
+            doRemoveHotelReference.current.requestSubmit();
+        }
+
+    }
+
+    const handleRemoveAllRoomReference = () => {
+
+        if (doRemoveAllRoomReference.current) {
+            doRemoveAllRoomReference.current.requestSubmit();
+        }
+
+    }
+
+    const handleRemoveRoom = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const hotelId = btoa(formData.get("hotelId"));
+        const roomNumber = btoa(formData.get("roomNumber"));
+
+        const removeRoom = async () => {
+            const response = await fetch(
+                `http://localhost:8080/catalog/remove-rooms?token=${token}&roomNumber=${roomNumber}&hotelId=${hotelId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                console.log(data);
+                alert(data);
+            } else {
+                alert("The data is already been deleted....");
+            }
+
+        }
+
+        removeRoom();
+    }
+
+    const handleRemoveAllRoomVisible = () => {
+        setIsRemoveAllRoomVisible(!isRemoveAllRoomVisible);
+        setIsRemoveHotelVisible(false);
+        setIsRemoveRoomVisible(false);
+    }
+
+    const handleRemoveRoomVisible = () => {
+        setIsRemoveRoomVisible(!isRemoveRoomVisible);
+        setIsRemoveHotelVisible(false);
+        setIsRemoveAllRoomVisible(false);
+    }
+
+    const handleRemoveHotelVisible = () => {
+        setIsRemoveHotelVisible(!isRemoveHotelVisible);
+        setIsRemoveAllRoomVisible(false);
+        setIsRemoveRoomVisible(false);
+    }
+
+    const handleRemoveAllRoom = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const hotelId = btoa(formData.get("hotelId"));
+
+        const removeRoom = async () => {
+            const response = await fetch(
+                `http://localhost:8080/catalog/remove-all-rooms?token=${token}&hotelId=${hotelId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                console.log(data);
+                alert(data);
+            } else {
+                alert("The data is already been deleted....");
+            }
+
+        }
+
+        removeRoom();
+    }
+
+    const handleRemoveHotelAndRoom = () => {
+        setIsRemoveHotelRoomVisible(!isRemoveHotelRoomVisible);
+    }
+
+    const handleRemoveHotel = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const hotelId = btoa(formData.get("hotelId"));
+
+        const removeRoom = async () => {
+            const response = await fetch(
+                `http://localhost:8080/catalog/remove-rooms?token=${token}&hotelId=${hotelId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                console.log(data);
+                alert(data);
+            } else {
+                alert("The data is already been deleted....");
+            }
+
+        }
+
+        removeRoom();
     }
 
     return (
@@ -234,6 +377,18 @@ function AdminPage() {
                             className="text-yellow-500 font-bold"
                         >
                             Add-Rooms
+                        </span>
+                    </a>
+                    <a
+                        onClick={handleRemoveHotelAndRoom}
+                        className="rounded-2xl bg-yellow-500/15 backdrop-blur-lg border border-yellow-600/30
+                            shadow-xl pt-2 pb-2 pl-5 pr-5 flex justify-center cursor-pointer hover:bg-amber-400/30
+                            transition duration-300 ease-in-out"
+                    >
+                        <span
+                            className="text-yellow-500 font-bold"
+                        >
+                            Remove
                         </span>
                     </a>
                 </div>
@@ -566,6 +721,220 @@ function AdminPage() {
                             </div>
                         </div>
                     </form>
+                )}
+                {isRemoveHotelRoomVisible && (
+                    <div
+                        className="rounded-3xl bg-amber-300/15 backdrop-blur-lg border border-amber-400/30 shadow-xl
+                            p-5 flex flex-col items-center justify-center ml-4 gap-3"
+                    >
+                        <a
+                            onClick={handleRemoveHotelVisible}
+                            className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                duration-300 ease-in-out cursor-pointer rounded-2xl"
+                        >
+                            <span
+                                className="text-red-600 font-bold"
+                            >
+                                Remove Hotel
+                            </span>
+                        </a>
+                        {isRemoveHotelVisible && (
+                            <form
+                                ref={doRemoveHotelReference}
+                                onSubmit={handleRemoveHotel}
+                                className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl p-5"
+                            >
+                                <h2
+                                    className="text-amber-700 font-bold"
+                                >
+                                    Hotel ID:
+                                </h2>
+                                <input 
+                                    name="hotelId"
+                                    placeholder="Hotel ID"
+                                    type="text" required
+                                    value={removeData.hotelId}
+                                    onChange={(event) => setRemoveData({...removeData, hotelId: event.target.value})}
+                                    className="w-full max-w-[400px] text-amber-700 mb-3 border-2 border-amber-700 focus:bg-red-500/50
+                                        rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none
+                                        transition duration-300 ease-in-out"
+                                />
+                                <div
+                                    className="flex flex-row justify-center gap-10"
+                                >
+                                    <a
+                                        onClick={handleRemoveHotelReference}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-green-500/15 backdrop-blur-lg
+                                            border border-green-500/30 shadow-xl hover:bg-green-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-green-600 font-bold"
+                                        >
+                                            Remove
+                                        </span>
+                                    </a>
+                                    <a
+                                        onClick={() => handleClearForm("removeRoom")}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                            border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-red-600 font-bold"
+                                        >
+                                            Cancel
+                                        </span>
+                                    </a>
+                                    </div>
+                            </form>
+                        )}
+
+                        <a
+                        onClick={handleRemoveRoomVisible}
+                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                duration-300 ease-in-out cursor-pointer rounded-2xl"
+                        >
+                            <span
+                                className="text-red-600 font-bold"
+                            >
+                                Remove Room
+                            </span>
+                        </a>
+                        {isRemoveRoomVisible && (
+                            <form
+                                ref={doRemoveRoomReference}
+                                onSubmit={handleRemoveRoom}
+                                className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl p-5"
+                            >
+                                <h2
+                                    className="text-amber-700 font-bold"
+                                >
+                                    Hotel ID:
+                                </h2>
+                                <input 
+                                    name="hotelId"
+                                    placeholder="Hotel ID"
+                                    type="text" required
+                                    value={removeData.hotelId}
+                                    onChange={(event) => setRemoveData({...removeData, hotelId: event.target.value})}
+                                    className="w-full max-w-[400px] text-amber-700 mb-3 border-2 border-amber-700 focus:bg-red-500/50
+                                        rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none
+                                        transition duration-300 ease-in-out"
+                                />
+                                <h2
+                                    className="text-amber-700 font-bold"
+                                >
+                                    Room Number:
+                                </h2>
+                                <input 
+                                    name="roomNumber"
+                                    placeholder="Room Number"
+                                    type="text" required
+                                    value={removeData.roomNumber}
+                                    onChange={(event) => setRemoveData({...removeData, roomNumber: event.target.value})}
+                                    className="w-full max-w-[400px] text-amber-700 mb-3 border-2 border-amber-700 focus:bg-red-500/50
+                                        rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none
+                                        transition duration-300 ease-in-out"
+                                />
+                                <div
+                                    className="flex flex-row justify-center gap-10"
+                                >
+                                    <a
+                                        onClick={handleRemoveReference}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-green-500/15 backdrop-blur-lg
+                                            border border-green-500/30 shadow-xl hover:bg-green-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-green-600 font-bold"
+                                        >
+                                            Remove
+                                        </span>
+                                    </a>
+                                    <a
+                                        onClick={() => handleClearForm("removeRoom")}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                            border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-red-600 font-bold"
+                                        >
+                                            Cancel
+                                        </span>
+                                    </a>
+                                </div>
+                            </form>
+                        )}        
+
+                        <a
+                            onClick={handleRemoveAllRoomVisible}
+                            className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                duration-300 ease-in-out cursor-pointer rounded-2xl"
+                        >
+                            <span
+                                className="text-red-600 font-bold"
+                            >
+                                Remove All Room
+                            </span>
+                        </a>
+                        {isRemoveAllRoomVisible && (
+                            <form
+                                ref={doRemoveAllRoomReference}
+                                onSubmit={handleRemoveAllRoom}
+                                className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl p-5"
+                            >
+                                <h2
+                                    className="text-amber-700 font-bold"
+                                >
+                                    Hotel ID:
+                                </h2>
+                                <input 
+                                    name="hotelId"
+                                    placeholder="Hotel ID"
+                                    type="text" required
+                                    value={removeData.hotelId}
+                                    onChange={(event) => setRemoveData({...removeData, hotelId: event.target.value})}
+                                    className="w-full max-w-[400px] text-amber-700 mb-3 border-2 border-amber-700 focus:bg-red-500/50
+                                        rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none
+                                        transition duration-300 ease-in-out"
+                                />
+                                <div
+                                    className="flex flex-row justify-center gap-10"
+                                >
+                                    <a
+                                        onClick={handleRemoveAllRoomReference}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-green-500/15 backdrop-blur-lg
+                                            border border-green-500/30 shadow-xl hover:bg-green-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-green-600 font-bold"
+                                        >
+                                            Remove
+                                        </span>
+                                    </a>
+                                    <a
+                                        onClick={() => handleClearForm("removeRoom")}
+                                        className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg
+                                            border border-red-500/30 shadow-xl hover:bg-red-500/30 transition
+                                            duration-300 ease-in-out cursor-pointer rounded-2xl"
+                                    >
+                                        <span
+                                            className="text-red-600 font-bold"
+                                        >
+                                            Cancel
+                                        </span>
+                                    </a>
+                                    </div>
+                            </form>
+                        )}
+                        
+                    </div>
                 )}
             </main>
         </section>
