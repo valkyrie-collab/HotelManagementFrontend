@@ -123,8 +123,8 @@ function SignInPage() {
     useEffect(
         () => {
             if (signUp) {
-                gsap.to(signUpDivRef.current,{x: "-108%", ease: "power2.out"})
-                gsap.to(signUpBackgroundImage.current,{x: "92%", ease: "power2.out"})
+                gsap.to(signUpDivRef.current,{x: "-160%", ease: "power2.out"})
+                gsap.to(signUpBackgroundImage.current,{x: "71%", ease: "power2.out"})
             } else {
                 gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
                 gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
@@ -145,7 +145,7 @@ function SignInPage() {
                         <div ref={signUpBackgroundImage} className=" relative ">
                             <img 
                                 src={SignUpBackground} 
-                                className="w-7xl rounded-xl" 
+                                className="w-[92%] rounded-xl" 
                             />
                         </div>
 
@@ -161,7 +161,7 @@ function SignInPage() {
                                     name="username" 
                                     placeholder="Username" 
                                     required
-                                    className="w-56 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
+                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
                                     transition ease-in-out duration-300 text-amber-600
                                     focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg mb-5" />
                             
@@ -170,7 +170,7 @@ function SignInPage() {
                                     name="password" 
                                     placeholder="Password" 
                                     required
-                                    className="w-56 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
+                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
                                     focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg transition ease-in-out duration-300" />
 
                                 <input 
@@ -178,12 +178,12 @@ function SignInPage() {
                                     name="confirm-password" 
                                     placeholder="Confirm-Password" 
                                     required
-                                    className="w-56 ml-5 mt-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
+                                    className="w-70 ml-5 mt-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
                                     focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg transition ease-in-out duration-300" />
 
                                 <select
                                     name="role"
-                                    className="w-56 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
+                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
                                     transition ease-in-out duration-300 text-amber-600
                                     focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg mt-5">
                                         <option value="">--Select-Option--</option>
@@ -217,7 +217,7 @@ function SignInPage() {
                         <div ref={signInBackgroundImage} className=" relative ">
                             <img 
                                 src={SignInBackground} 
-                                className="w-[93%] rounded-xl" 
+                                className="w-[87%] rounded-xl" 
                             />
                         </div>
 
