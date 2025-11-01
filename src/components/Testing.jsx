@@ -1,190 +1,336 @@
-import { useRef, useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import SignInBackground from "./assets/SignInBackground.PNG";
+import SignUpBackground from "./assets/SignUpBackground.PNG";
+import Invisible from "./assets/invisible.png";
+import Visible from "./assets/visible.png";
 
 function Testing() {
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [isFormActive, setIsFormActive] = useState(false);
-  const [isAddRoom, setIsAddRoom] = useState(false);
-  const [hotelImages, setHotelImages] = useState([]);
-  const doReference = useRef(null);
-  const token = localStorage.getItem("token");
+  const [isPasswordSignIn, setIsPasswordSignIn] = useState(false);
+  const [isPasswordSignUp, setIsPasswordSignUp] = useState([false, false]);
+  const [isSignIn, setIsSignIn] = useState(true);
+  const signInFormRef = useRef(null);
+  const signUpFormRef = useRef(null);
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState({
+    username: "username",
+    password: "password",
+    role: "role",
+  });
 
-  const handleAddHotel = () => {
-    if (!isFormVisible) {
-      // Show form
-      setIsFormActive(true);
-      setTimeout(() => setIsFormVisible(true), 50);
-    } else {
-      // Hide form
-      setIsFormVisible(false);
-      setTimeout(() => setIsFormActive(false), 300); // Match Tailwind duration
+  const handleSignInSubmit = () => {
+    if (signInFormRef.current) {
+      signInFormRef.current.requestSubmit();
     }
   };
 
-  const handleAddRooms = () => {
-    setIsAddRoom(!isAddRoom);
-  };
-
-  const handleReference = () => {
-    if (doReference.current) {
-      doReference.current.requestSubmit();
+  const handleSignUpSubmit = () => {
+    if (signUpFormRef.current) {
+      signUpFormRef.current.requestSubmit();
     }
   };
 
-  const handleHotelImages = (event) => {
-    const images = [];
-    for (let i = 0; i < event.target.files.length; i++) {
-      images.push(event.target.files[i]);
-    }
-    setHotelImages(images);
+  const handleUserData = (event) => {
+    const { name, value } = event.target;
+    setUserData((data) => ({ ...data, [name]: value }));
   };
 
-  const handleHotelData = async (event) => {
+  const handleSignIn = (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    const name = formData.get("name");
-    const brand = formData.get("brand");
-    const description = formData.get("description");
-    const address = formData.get("address");
-    const contact = formData.get("contact");
+    const fetchToken = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/user/sign-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userData),
+        });
 
-    const jsonBody = {
-      name,
-      brand,
-      description,
-      address,
-      contact,
+        if (response.ok) {
+          const data = await response.text();
+          localStorage.setItem("token", data);
+          alert("sign in successful");
+          navigate("/");
+        } else {
+          alert("sign in unsuccessful, try again");
+        }
+      } catch (error) {
+        alert(`Backend Not Found....${error}`);
+      }
     };
 
-    console.log(jsonBody);
-    console.log("token", token);
+    fetchToken();
+  };
 
-    const sendFormData = new FormData();
-    sendFormData.append("token", token);
-    sendFormData.append("hotelJsonDataString", JSON.stringify(jsonBody));
-    hotelImages.forEach((image) => {
-      sendFormData.append("imageFiles", image);
-    });
+  const handleSignUp = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const confirmPassword = formData.get("confirm-password");
 
-    try {
-      const response = await fetch("http://localhost:8080/catalog/add-hotel", {
-        method: "POST",
-        body: sendFormData,
-      });
+    if (userData.password !== confirmPassword) {
+      alert("passwords do not match");
+      return;
+    }
 
-      if (response.ok) {
-        const data = await response.text();
-        console.log(data);
-        alert(data);
-      } else {
-        alert("Server error");
+    const fetchSave = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/user/sign-up", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userData),
+        });
+
+        if (response.ok) {
+          const data = await response.text();
+          alert(data);
+        } else {
+          alert("Sign up error");
+        }
+      } catch (error) {
+        alert(`Backend is not connected.....${error}`);
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Network error");
+    };
+
+    fetchSave();
+  };
+
+  const handleEyeToggling = (event) => {
+    if (event === 0) {
+      setIsPasswordSignIn(!isPasswordSignIn);
+    } else if (event === 1) {
+      setIsPasswordSignUp([!isPasswordSignUp[0], isPasswordSignUp[1]]);
+    } else {
+      setIsPasswordSignUp([isPasswordSignUp[0], !isPasswordSignUp[1]]);
     }
   };
 
   return (
-    <section className="w-screen h-screen bg-[url('./components/assets/HomePageBackground.png')] bg-cover">
-      <header className="h-20 bg-red-500/15 backdrop-blur-lg border border-red-600/30 sticky flex flex-row items-center justify-between pl-5 pr-5">
-        <h1 className="text-red-600 font-bold">Admin Page</h1>
-        <div className="flex gap-4">
-          <a
-            onClick={handleAddHotel}
-            className="rounded-2xl bg-yellow-500/15 backdrop-blur-lg border border-yellow-600/30 shadow-xl pt-2 pb-2 pl-5 pr-5 flex justify-center cursor-pointer hover:bg-amber-400/30 transition duration-300 ease-in-out"
-          >
-            <span className="text-yellow-500 font-bold">Add-Hotel</span>
-          </a>
-          <a
-            onClick={handleAddRooms}
-            className="rounded-2xl bg-yellow-500/15 backdrop-blur-lg border border-yellow-600/30 shadow-xl pt-2 pb-2 pl-5 pr-5 flex justify-center cursor-pointer hover:bg-amber-400/30 transition duration-300 ease-in-out"
-          >
-            <span className="text-yellow-500 font-bold">Add-Rooms</span>
-          </a>
-        </div>
-      </header>
-
-      <main className="flex justify-center p-10">
-        {isFormActive && (
-          <form
-            ref={doReference}
-            onSubmit={handleHotelData}
-            className={`transform transition-all duration-300 ease-in-out ${
-              isFormVisible
-                ? 'opacity-100 scale-100 pointer-events-auto'
-                : 'opacity-0 scale-95 pointer-events-none'
-            } rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 max-w-4/5 p-5 flex flex-row gap-4`}
-          >
-            <div className="rounded-xl bg-red-500/15 backdrop-blur-lg border border-red-600/30 shadow-xl p-5">
-              <h2 className="text-yellow-500 font-bold">Hotel Name:</h2>
-              <input
-                name="name"
-                placeholder="Hotel-Name"
-                type="text"
-                required
-                className="w-full max-w-[400px] text-yellow-500 mb-3 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-              />
-              <h2 className="text-yellow-500 font-bold">Description:</h2>
-              <input
-                name="description"
-                placeholder="Description"
-                type="text"
-                required
-                className="w-full max-w-[400px] text-yellow-500 mb-3 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-              />
-              <h2 className="text-yellow-500 font-bold">Contact:</h2>
-              <input
-                name="contact"
-                placeholder="Contact"
-                type="number"
-                required
-                className="w-full max-w-[400px] text-yellow-500 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-              />
+    <section
+      className="flex items-center justify-center h-screen w-screen 
+            bg-[url('./components/assets/background.png')] bg-cover"
+    >
+      <div className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl p-5 w-[70%] h-[80%] relative overflow-hidden">
+        {/* SignIn container */}
+        <div
+          className={`absolute inset-0 flex flex-row items-center gap-5 transition-transform duration-500 ease-in-out ${
+            isSignIn ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <img
+            src={SignInBackground}
+            alt="hotel image"
+            className="rounded-3xl w-[50%] h-[100%] object-cover"
+          />
+          <div className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl p-5 w-[60%] h-[100%]">
+            <div className="m-5 flex justify-center">
+              <h2 className="text-amber-600 text-3xl font-bold">Sign-In</h2>
             </div>
-            <div className="rounded-xl bg-red-500/15 backdrop-blur-lg border border-red-600/30 shadow-xl p-5">
-              <h2 className="text-yellow-500 font-bold">Brand:</h2>
-              <input
-                name="brand"
-                placeholder="Brand"
-                type="text"
-                required
-                className="w-full max-w-[400px] text-yellow-500 mb-3 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-              />
-              <h2 className="text-yellow-500 font-bold">Address:</h2>
-              <input
-                name="address"
-                placeholder="Address"
-                type="text"
-                required
-                className="w-full max-w-[400px] text-yellow-500 mb-3 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-              />
-              <h2 className="text-yellow-500 font-bold">Hotel Images:</h2>
-              <input
-                placeholder="Hotel Images"
-                type="file"
-                required
-                className="text-yellow-500 mb-3 border-2 border-amber-400 focus:bg-red-500/50 rounded-xl pl-2 pt-1 pb-1 pr-1 font-bold focus:ring-0 focus:border-amber-600 focus:outline-none transition duration-300 ease-in-out"
-                accept="image/*"
-                multiple
-                onChange={handleHotelImages}
-              />
-              <div className="flex flex-row justify-center gap-10 p-5">
-                <a
-                  onClick={handleReference}
-                  className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-green-500/15 backdrop-blur-lg border border-green-500/30 shadow-xl hover:bg-green-500/30 transition duration-300 ease-in-out cursor-pointer rounded-2xl"
+            <form ref={signInFormRef} onSubmit={handleSignIn}>
+              <div className="m-5">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Username</h2>
+                <input
+                  value={userData.username}
+                  type="text"
+                  name="username"
+                  placeholder="--username--"
+                  onChange={handleUserData}
+                  required
+                  className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                />
+              </div>
+              <div className="m-5">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Password</h2>
+                <div className="flex flex-row">
+                  <input
+                    value={userData.password}
+                    type={isPasswordSignIn ? "text" : "password"}
+                    name="password"
+                    placeholder="--password--"
+                    onChange={handleUserData}
+                    required
+                    className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                  />
+                  <a
+                    onClick={() => handleEyeToggling(0)}
+                    className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out cursor-pointer"
+                  >
+                    <img
+                      src={isPasswordSignIn ? Invisible : Visible}
+                      alt="eye"
+                      className="w-[80%] h-[90%] object-cover"
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="m-5">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Role</h2>
+                <select
+                  name="role"
+                  onChange={handleUserData}
+                  className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
                 >
-                  <span className="text-green-600 font-bold">Save</span>
+                  <option value="">--Select Role--</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </form>
+
+            <div className="m-10">
+              <div className="flex flex-row gap-10">
+                <a
+                  onClick={handleSignInSubmit}
+                  className="p-3 rounded-3xl w-[50%] bg-green-500/15 backdrop-blur-lg flex items-center justify-center border border-green-500/30 shadow-xl focus:outline-none focus:ring-1 focus:border-green-600/30 focus:ring-green-600/30 hover:bg-green-600/20 transition duration-300 ease-in-out cursor-pointer"
+                >
+                  <span className="text-lg font-bold text-green-600">Sign in</span>
                 </a>
                 <a
-                  className="pt-1 pl-5 pr-5 pb-1 flex justify-center bg-red-500/15 backdrop-blur-lg border border-red-500/30 shadow-xl hover:bg-red-500/30 transition duration-300 ease-in-out cursor-pointer rounded-2xl"
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                  className="p-3 rounded-3xl w-[50%] bg-yellow-500/15 backdrop-blur-lg flex items-center justify-center border border-yellow-500/30 shadow-xl focus:outline-none focus:ring-1 focus:yellow-green-600/30 focus:ring-yellow-600/30 hover:bg-yellow-600/20 transition duration-300 ease-in-out cursor-pointer"
                 >
-                  <span className="text-red-600 font-bold">Cancel</span>
+                  <span className="text-lg font-bold text-yellow-600">Home</span>
                 </a>
               </div>
+              <div className="flex flex-row gap-1 m-5 justify-center">
+                <p className="text-lg font-bold text-amber-600 cursor-default">
+                  Do not have account?{" "}
+                </p>
+                <span
+                  onClick={() => {
+                    setIsSignIn(false);
+                  }}
+                  className="text-lg font-bold text-amber-600 cursor-pointer hover:text-amber-800 transition duration-300 ease-in-out"
+                >
+                  sign-up
+                </span>
+              </div>
             </div>
-          </form>
-        )}
-      </main>
+          </div>
+        </div>
+
+        {/* SignUp container */}
+        <div
+          className={`absolute inset-0 flex flex-row items-center gap-5 transition-transform duration-500 ease-in-out ${
+            isSignIn ? "translate-x-full" : "translate-x-0"
+          }`}
+        >
+          <div className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl p-5 w-[60%] h-[100%]">
+            <div className="m-3 flex justify-center">
+              <h2 className="text-amber-600 text-3xl font-bold">Sign-Up</h2>
+            </div>
+            <form ref={signUpFormRef} onSubmit={handleSignUp}>
+              <div className="m-3">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Username</h2>
+                <input
+                  value={userData.username}
+                  type="text"
+                  name="username"
+                  placeholder="--username--"
+                  onChange={handleUserData}
+                  required
+                  className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                />
+              </div>
+              <div className="m-3">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Password</h2>
+                <div className="flex flex-row">
+                  <input
+                    value={userData.password}
+                    type={isPasswordSignUp[0] ? "text" : "password"}
+                    name="password"
+                    placeholder="--password--"
+                    onChange={handleUserData}
+                    required
+                    className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                  />
+                  <a
+                    onClick={() => handleEyeToggling(1)}
+                    className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out cursor-pointer"
+                  >
+                    <img
+                      src={isPasswordSignUp[0] ? Invisible : Visible}
+                      alt="eye"
+                      className="w-[80%] h-[90%] object-cover"
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="m-3">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Confirm Password</h2>
+                <div className="flex flex-row">
+                  <input
+                    type={isPasswordSignUp[1] ? "text" : "password"}
+                    name="confirm-password"
+                    placeholder="--confirm password--"
+                    required
+                    className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                  />
+                  <a
+                    onClick={() => handleEyeToggling(2)}
+                    className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out cursor-pointer"
+                  >
+                    <img
+                      src={isPasswordSignUp[1] ? Invisible : Visible}
+                      alt="eye"
+                      className="w-[80%] h-[90%] object-cover"
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="m-3">
+                <h2 className="pl-3 text-amber-600 text-lg font-bold">Role</h2>
+                <select
+                  name="role"
+                  onChange={handleUserData}
+                  className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30 focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                >
+                  <option value="">--Select Role--</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </form>
+
+            <div className="m-8">
+              <div className="flex flex-row gap-10">
+                <a
+                  onClick={handleSignUpSubmit}
+                  className="p-3 rounded-3xl w-[50%] bg-green-500/15 backdrop-blur-lg flex items-center justify-center border border-green-500/30 shadow-xl focus:outline-none focus:ring-1 focus:border-green-600/30 focus:ring-green-600/30 hover:bg-green-600/20 transition duration-300 ease-in-out cursor-pointer"
+                >
+                  <span className="text-lg font-bold text-green-600">Sign Up</span>
+                </a>
+                <a
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                  className="p-3 rounded-3xl w-[50%] bg-yellow-500/15 backdrop-blur-lg flex items-center justify-center border border-yellow-500/30 shadow-xl focus:outline-none focus:ring-1 focus:yellow-green-600/30 focus:ring-yellow-600/30 hover:bg-yellow-600/20 transition duration-300 ease-in-out cursor-pointer"
+                >
+                  <span className="text-lg font-bold text-yellow-600">Home</span>
+                </a>
+              </div>
+              <div className="flex flex-row gap-1 m-3 justify-center">
+                <p className="text-lg font-bold text-amber-600 cursor-default">
+                  Already have account?{" "}
+                </p>
+                <span
+                  onClick={() => {
+                    setIsSignIn(true);
+                  }}
+                  className="text-lg font-bold text-amber-600 cursor-pointer hover:text-amber-800 transition duration-300 ease-in-out"
+                >
+                  sign-in
+                </span>
+              </div>
+            </div>
+          </div>
+          <img
+            src={SignUpBackground}
+            alt="hotel image"
+            className="rounded-3xl w-[50%] h-[100%] object-cover"
+          />
+        </div>
+      </div>
     </section>
   );
 }

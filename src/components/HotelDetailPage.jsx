@@ -63,6 +63,13 @@ function HotelDetailPage() {
         navigate(`/room-service/${hotelId}`);
     }
 
+    const scrollRef = useRef(null);
+
+    const handleWheel = (event) => {
+        event.preventDefault(); // Prevent vertical scroll
+        scrollRef.current.scrollLeft += event.deltaY; // Scroll horizontally by deltaY
+    };
+
     return (
         <section
             className="h-screen w-screen bg-[url('./components/assets/HomePageBackground.png')]
@@ -115,6 +122,8 @@ function HotelDetailPage() {
             </div>
             <div className="ml-1.5">
                 <div
+                    ref={scrollRef}
+                    onWheel={handleWheel}
                     className="rounded-xl bg-white/15 backdrop-blur-lg border flex flex-row gap-4
                         border-white/30 shadow-xl p-5 max-w-2xl mb-3 overflow-x-auto whitespace-nowrap
                         scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -124,7 +133,7 @@ function HotelDetailPage() {
                             key={index} 
                             src={`data:${image.type};base64,${image.data}`} 
                             alt={image.name}
-                            className="rounded-xl w-3/8 h-3/8"
+                            className="rounded-xl w-[34%] h-[50%] object-cover"
                     />
                     )
                 )}

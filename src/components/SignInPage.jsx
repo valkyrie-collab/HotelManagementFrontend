@@ -1,23 +1,28 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {gsap} from "gsap"
 import SignInBackground from "./assets/SignInBackground.PNG"
 import SignUpBackground from "./assets/SignUpBackground.PNG"
+import Invisible from "./assets/invisible.png"
+import Visible from "./assets/visible.png"
 
 function SignInPage() {
-    const [signUp, setSignUp] = useState(false);
+    // const [signUp, setSignUp] = useState(false);
+    const [isPasswordSignIn, setIsPasswordSignIn] = useState(false);
+    const [isPasswordSignUp, setIsPasswordSignUp] = useState([false, false]);
+    const [isSignIn, setIsSignIn] = useState(true);
     const signInFormRef = useRef(null);
     const signUpFormRef = useRef(null);
-    const signInDivRef = useRef(null);
-    const signUpDivRef = useRef(null);
-    const signUpBackgroundImage = useRef(null);
-    const signInBackgroundImage = useRef(null);
+    // const signInDivRef = useRef(null);
+    // const signUpDivRef = useRef(null);
+    // const signUpBackgroundImage = useRef(null);
+    // const signInBackgroundImage = useRef(null);
     const navigate = useNavigate();
     // useEffect(
     //     () => {
     //         console.log(signUp);
     //     },
     // [signUp])
+    const [userData, setUserData] = useState({username: "username", password: "password", role: "role"});
 
     const handleSignInSubmit = () => {
         
@@ -36,38 +41,47 @@ function SignInPage() {
 
     }
 
+    const handleUserData = (event) => {
+        const {name, value} = event.target;
+        setUserData(data => ({...data, [name]: value}));
+    }
+
     const handleSignIn = (event) => {
         event.preventDefault();
-        const formData = new FormData(event.target);
-        const username = formData.get("username");
-        const password = formData.get("password");
-        const role = formData.get("role");
+        console.log(userData);
+        // const formData = new FormData(event.target);
+        // const username = formData.get("username");
+        // const password = formData.get("password");
+        // const role = formData.get("role");
 
-        const jsonBody = {username:username, password:password, role:role};
+        // const jsonBody = {username:username, password:password, role:role};
 
         // console.log(jsonBody);
 
         const fetchToken = async () => {
             // console.log("working fetch");
-            const response = await fetch ("http://localhost:8080/user/sign-in", 
-                {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(jsonBody)
+            try {
+                const response = await fetch ("http://localhost:8080/user/sign-in", 
+                    {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(userData)
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.text();
+                    console.log(data);
+                    localStorage.setItem("token", data);
+                    alert("sign in successful");
+                    navigate("/")
+                } else {
+                    // console.log("server not working")
+                    alert("sign in unsuccessful try again")
                 }
-            );
-
-            if (response.ok) {
-                const data = await response.text();
-                console.log(data);
-                localStorage.setItem("token", data);
-                alert("sign in successful");
-                navigate("/")
-            } else {
-                // console.log("server not working")
-                alert("sign in unsuccessful try again")
+            } catch (error) {
+                alert(`Backend Not Found....${error}`);
             }
-
         }
 
         fetchToken();
@@ -76,36 +90,39 @@ function SignInPage() {
 
     const handleSignUp = (event) => {
         event.preventDefault();
+        console.log(userData);
         const formData = new FormData(event.target);
-        const username = formData.get("username");
-        const password = formData.get("password");
         const confirmPassword = formData.get("confirm-password");
-        const role = formData.get("role");
 
-        if (password !== confirmPassword) {
+        if (userData.password !== confirmPassword) {
             alert("password do not matched");
             return ;
         }
 
-        const jsonBody = {username: username, password: password, role: role};
+        // const jsonBody = {username: username, password: password, role: role};
 
         // console.log(jsonBody);
 
         const fetchSave = async () => {
-            const response = await fetch("http://localhost:8080/user/sign-up",
-                {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify(jsonBody)
-                }
-            );
+            try {
+                const response = await fetch("http://localhost:8080/user/sign-up",
+                    {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(userData)
+                    }
+                );
 
-            if (response.ok) {
-                const data = await response.text();
-                alert(data);
-                // console.log(data);
-            } else {
-                alert("Sign in error")
+                if (response.ok) {
+                    const data = await response.text();
+                    alert(data);
+                    setIsSignIn(true);
+                    // console.log(data);
+                } else {
+                    alert("Sign in error")
+                }
+            } catch (error) {
+                alert(`Backend is not connected.....${error}`)
             }
 
         }
@@ -113,170 +130,294 @@ function SignInPage() {
         fetchSave();
     }
 
-    useEffect(
-        () => {
-            gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
-            gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
-        },
-    []);
+    // useEffect(
+    //     () => {
+    //         gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
+    //         gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
+    //     },
+    // []);
 
-    useEffect(
-        () => {
-            if (signUp) {
-                gsap.to(signUpDivRef.current,{x: "-160%", ease: "power2.out"})
-                gsap.to(signUpBackgroundImage.current,{x: "71%", ease: "power2.out"})
-            } else {
-                gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
-                gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
-            }
+    // useEffect(
+    //     () => {
+    //         if (signUp) {
+    //             gsap.to(signUpDivRef.current,{x: "-160%", ease: "power2.out"})
+    //             gsap.to(signUpBackgroundImage.current,{x: "71%", ease: "power2.out"})
+    //         } else {
+    //             gsap.to(signInDivRef.current, {x: 0, ease: "power2.out"})
+    //             gsap.to(signInBackgroundImage.current, {x: 0, ease: "power2.out"})
+    //         }
+    //     }
+    // , [signUp]);
+    const handleEyeToggling = (event) => {
+        
+        if (event === 0) {
+            setIsPasswordSignIn(!isPasswordSignIn);
+        } else if (event === 1) {
+            setIsPasswordSignUp([!isPasswordSignUp[0], isPasswordSignUp[1]]);
+        } else {
+            setIsPasswordSignUp([isPasswordSignUp[0], !isPasswordSignUp[1]]);
         }
-    , [signUp]);
+
+    }
 
     return (
         <section className="flex items-center justify-center h-screen w-screen 
             bg-[url('./components/assets/background.png')] bg-cover">
             
-            <div className="rounded-2xl bg-white/15 backdrop-blur-lg border 
-                border-white/30 shadow-xl h-[75%] w-[50%] p-5 flex items-center ">
-                {signUp? (
-                    //This div below contains Sign Up
-                    <div className="flex flex-row items-center justify-center">
-
-                        <div ref={signUpBackgroundImage} className=" relative ">
-                            <img 
-                                src={SignUpBackground} 
-                                className="w-[92%] rounded-xl" 
-                            />
+            <div
+                className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl 
+                    p-5 w-[70%] h-[80%] relative overflow-hidden"
+            >
+                <div
+                    className={`p-5 absolute inset-0 flex flex-row items-center gap-5 transition-transform duration-500 ease-in-out ${
+                        isSignIn ? 'translate-x-0' : '-translate-x-full'}`}
+                >
+                    <img src={SignInBackground} alt="hotel image" className="rounded-3xl w-[50%] h-[100%] object-cover" />
+                    <div
+                        className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl
+                            p-5 w-[60%] h-[100%]"
+                    >
+                        <div
+                            className="m-5 flex justify-center"
+                        >
+                            <h2 
+                                className="text-amber-600 text-3xl font-bold"
+                            >
+                                Sign-In
+                            </h2>
                         </div>
-
-                        <div ref={signUpDivRef} className="rounded-2xl bg-white/15 backdrop-blur-lg border relative
-                            border-white/30 shadow-xl pl-5 pr-8 pt-6 pb-9 flex flex-col items-center">
-                                
-                            <h2 className="text-amber-600 text-2xl pb-5 font-bold text-center">Sign-in</h2>
-                            
-                            <form ref={signUpFormRef} onSubmit={handleSignUp}>
-
-                                <input 
-                                    type="text" 
-                                    name="username" 
-                                    placeholder="Username" 
+                        <form ref={signInFormRef} onSubmit={handleSignIn}>
+                            <div
+                                className="m-5"
+                            >
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Username</h2>
+                                <input
+                                    value={userData.username}
+                                    type="text"
+                                    name="username"
+                                    placeholder="--username--"
+                                    onChange={handleUserData}
                                     required
-                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
-                                    transition ease-in-out duration-300 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg mb-5" />
-                            
-                                <input 
-                                    type="text" 
-                                    name="password" 
-                                    placeholder="Password" 
-                                    required
-                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg transition ease-in-out duration-300" />
-
-                                <input 
-                                    type="text" 
-                                    name="confirm-password" 
-                                    placeholder="Confirm-Password" 
-                                    required
-                                    className="w-70 ml-5 mt-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg transition ease-in-out duration-300" />
-
-                                <select
+                                    className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out
+                                        border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                        focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                                />
+                            </div>
+                            <div
+                                className="m-5"
+                            >
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Password</h2>
+                                <div className="flex flex-row">
+                                    <input
+                                        value={userData.password}
+                                        type={isPasswordSignIn? "text" : "password"}
+                                        name="password"
+                                        placeholder="--password--"
+                                        onChange={handleUserData}
+                                        required
+                                        className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                           focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    />
+                                    <a
+                                        onClick={() => handleEyeToggling(0)}
+                                        className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                         focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    >
+                                        <img src={isPasswordSignIn? Invisible : Visible} alt="eye" className="w-[80%] h-[90%] object-cover"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div className="m-5">
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Role</h2>
+                                <select 
                                     name="role"
-                                    className="w-70 ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
-                                    transition ease-in-out duration-300 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg mt-5">
-                                        <option value="">--Select-Option--</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="user">User</option>
-                                </select>
-
-                                <a 
-                                    onClick={handleSignUpSubmit}
-                                    className="rounded-2xl bg-white/15 backdrop-blur-lg border 
-                                        transition ease-in-out duration-300 hover:bg-amber-700/30 cursor-pointer
-                                        border-white/30 ml-5 pt-0.5 pb-0.5 mt-5 flex items-center justify-center"
+                                    onChange={handleUserData}
+                                    className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out
+                                        border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                     focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
                                 >
-                                    <span className="text-amber-600 font-bold text-center">Sign-up</span>
-                                </a>
-
-                            </form>
-
-                            <p className="text-amber-700 ml-2 pt-2 pb-1 max-w-[100%]">Do not have account 
-                                <a onClick={() => setSignUp(!signUp)}> 
-                                    <span className="text-amber-700 hover:text-amber-900 cursor-pointer"> Sign-in</span>
-                                </a> 
-                            </p>
-
-                        </div>
-                        
-                    </div>
-                ) : (
-                    // This div (below) contains Sign In 
-                    <div className="flex flex-row items-center justify-center">
-                        <div ref={signInBackgroundImage} className=" relative ">
-                            <img 
-                                src={SignInBackground} 
-                                className="w-[87%] rounded-xl" 
-                            />
-                        </div>
-
-                        <div ref={signInDivRef} className="rounded-2xl bg-white/15 backdrop-blur-lg border relative
-                            border-white/30 shadow-xl pl-5 pr-8 pt-8 pb-11 flex flex-col items-center">
-                                
-                            <h2 className="text-amber-600 text-2xl pb-5 font-bold text-center">Sign-in</h2>
-                            
-                            <form ref={signInFormRef} onSubmit={handleSignIn}>
-
-                                <input 
-                                    type="text" 
-                                    name="username" 
-                                    placeholder="Username" 
-                                    required
-                                    className="max-w-[100%] ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 
-                                    transition ease-in-out duration-300 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg mb-5" />
-                            
-                                <input 
-                                    type="text" 
-                                    name="password" 
-                                    placeholder="Password" 
-                                    required
-                                    className="max-w-[100%] ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/35 text-amber-600
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg transition ease-in-out duration-300" />
-
-                                <select
-                                    name="role"
-                                    className="max-w-[100%] ml-5 p-2 border border-amber-600 rounded-lg placeholder:text-black/25
-                                    transition ease-in-out duration-300 
-                                    focus:outline-none focus:ring-1 focus:ring-amber-600 hover:backdrop-blur-lg text-amber-600 mt-5">
-                                        <option value="">--Select-Option--</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="user">User</option>
+                                    <option value="">--Select Role--</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
                                 </select>
-
-                                <a 
+                            </div>
+                        </form>
+                    
+                        <div
+                            className="m-10"
+                        >
+                            <div className="flex flex-row gap-10">
+                                <a
                                     onClick={handleSignInSubmit}
-                                    className="rounded-2xl bg-white/15 backdrop-blur-lg border 
-                                        transition ease-in-out duration-300 hover:bg-amber-700/30 cursor-pointer
-                                        border-white/30 ml-5 pt-0.5 pb-0.5 mt-5 flex items-center justify-center"
+                                    className="p-3 rounded-3xl w-[50%] bg-green-500/15 backdrop-blur-lg flex items-center justify-center
+                                        border border-green-500/30 shadow-xl focus:outline-none focus:ring-1 focus:border-green-600/30
+                                        focus:ring-green-600/30 hover:bg-green-600/20 transition duration-300 ease-in-out cursor-pointer"
                                 >
-                                    <span className="text-amber-600 font-bold text-center">Sign-in</span>
+                                    <span className="text-lg font-bold text-green-600">Sign in</span>
                                 </a>
-
-                            </form>
-
-                            <p className="text-amber-700 ml-2 pt-2 pb-1 max-w-[100%]">Do not have account 
-                                <a onClick={() => setSignUp(!signUp)}> 
-                                    <span className="text-amber-700 hover:text-amber-900 cursor-pointer"> Sign-up</span>
-                                </a> 
-                            </p>
-
+                                <a
+                                    onClick={() => {navigate("/")}}
+                                    className="p-3 rounded-3xl w-[50%] bg-yellow-500/15 backdrop-blur-lg flex items-center justify-center
+                                        border border-yellow-500/30 shadow-xl focus:outline-none focus:ring-1 focus:yellow-green-600/30
+                                     focus:ring-yellow-600/30 hover:bg-yellow-600/20 transition duration-300 ease-in-out
+                                        cursor-pointer"
+                                >
+                                    <span className="text-lg font-bold text-yellow-600">Home</span>
+                                </a>
+                            </div>
+                            <div className="flex flex-row gap-1 m-5 justify-center">
+                                <p className="text-lg font-bold text-amber-600 cursor-default">Do not have account? </p>
+                                <span 
+                                    onClick={() => {setIsSignIn(false)}}
+                                    className="text-lg font-bold text-amber-600 cursor-pointer hover:text-amber-800
+                                        transition duration-300 ease-in-out"
+                                >
+                                    sign-up
+                                </span>
+                            </div>
                         </div>
-                        
                     </div>
-                )}
-
+                </div>
+                <div
+                    className={`p-5 absolute inset-0 flex flex-row items-center gap-5 transition-transform duration-500 ease-in-out ${
+                        isSignIn ? "translate-x-full" : "translate-x-0"}`}
+                >
+                    <div
+                        className="rounded-3xl bg-white/15 border border-white/30 backdrop-blur-lg shadow-xl
+                            p-5 w-[60%] h-[100%]"
+                    >
+                        <div
+                            className="m-3 flex justify-center"
+                        >
+                            <h2 
+                                className="text-amber-600 text-3xl font-bold"
+                            >
+                                Sign-Up
+                            </h2>
+                        </div>
+                        <form ref={signUpFormRef} onSubmit={handleSignUp}>
+                            <div
+                                className="m-3"
+                            >
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Username</h2>
+                                <input
+                                    value={userData.username}
+                                    type="text"
+                                    name="username"
+                                    placeholder="--username--"
+                                    onChange={handleUserData}
+                                    required
+                                    className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out
+                                        border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                        focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                                />
+                            </div>
+                            <div
+                                className="m-3"
+                            >
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Password</h2>
+                                <div className="flex flex-row">
+                                    <input
+                                        value={userData.password}
+                                        type={isPasswordSignUp[0]? "text" : "password"}
+                                        name="password"
+                                        placeholder="--password--"
+                                        onChange={handleUserData}
+                                        required
+                                        className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                            focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    />
+                                    <a
+                                        onClick={() => handleEyeToggling(1)}
+                                        className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                            focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    >
+                                        <img src={isPasswordSignUp[0]? Invisible : Visible} alt="eye" className="w-[80%] h-[90%] object-cover"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div
+                                className="m-3"
+                            >
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Confirm Password</h2>
+                                <div className="flex flex-row">
+                                    <input
+                                        // value={userData.password}
+                                        type={isPasswordSignUp[1]? "text" : "password"}
+                                        name="confirm-password"
+                                        placeholder="--confirm password--"
+                                        // onChange={handleUserData}
+                                        required
+                                        className="p-3 rounded-tl-3xl rounded-bl-3xl w-[90%] bg-white/15 backdrop-blur-lg
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                            focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    />
+                                    <a
+                                        onClick={() => handleEyeToggling(2)}
+                                        className="p-3 rounded-tr-3xl rounded-br-3xl w-[10%] bg-white/15 backdrop-blur-lg flex items-center justify-center
+                                            border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                            focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600 transition duration-300 ease-in-out"
+                                    >
+                                        <img src={isPasswordSignUp[1]? Invisible : Visible} alt="eye" className="w-[80%] h-[90%] object-cover"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div className="m-3">
+                                <h2 className="pl-3 text-amber-600 text-lg font-bold">Role</h2>
+                                <select 
+                                    name="role"
+                                    onChange={handleUserData}
+                                    className="p-3 rounded-3xl w-[100%] bg-white/15 backdrop-blur-lg transition duration-300 ease-in-out
+                                        border border-white/30 shadow-xl focus:outline-none focus:ring-1 focus:border-amber-600/30
+                                        focus:ring-amber-600/30 hover:bg-amber-600/20 text-lg font-bold text-amber-600"
+                                >
+                                    <option value="">--Select Role--</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </form>
+                        
+                        <div
+                            className="m-8"
+                        >
+                            <div className="flex flex-row gap-10">
+                                <a
+                                    onClick={handleSignUpSubmit}
+                                    className="p-3 rounded-3xl w-[50%] bg-green-500/15 backdrop-blur-lg flex items-center justify-center
+                                        border border-green-500/30 shadow-xl focus:outline-none focus:ring-1 focus:border-green-600/30
+                                        focus:ring-green-600/30 hover:bg-green-600/20 transition duration-300 ease-in-out cursor-pointer"
+                                >
+                                    <span className="text-lg font-bold text-green-600">Sign Up</span>
+                                </a>
+                                <a
+                                    onClick={() => {navigate("/")}}
+                                    className="p-3 rounded-3xl w-[50%] bg-yellow-500/15 backdrop-blur-lg flex items-center justify-center
+                                        border border-yellow-500/30 shadow-xl focus:outline-none focus:ring-1 focus:yellow-green-600/30
+                                        focus:ring-yellow-600/30 hover:bg-yellow-600/20 transition duration-300 ease-in-out
+                                        cursor-pointer"
+                                >
+                                    <span className="text-lg font-bold text-yellow-600">Home</span>
+                                </a>
+                            </div>
+                                <div className="flex flex-row gap-1 m-3 justify-center">
+                                <p className="text-lg font-bold text-amber-600 cursor-default">Do not have account? </p>
+                                <span 
+                                    onClick={() => {setIsSignIn(true)}}
+                                    className="text-lg font-bold text-amber-600 cursor-pointer hover:text-amber-800
+                                        transition duration-300 ease-in-out"
+                                >
+                                    sign-in
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <img  src={SignUpBackground} alt="hotel image" className="rounded-3xl w-[50%] h-[100%] object-cover" />
+                </div>
             </div>
 
         </section>

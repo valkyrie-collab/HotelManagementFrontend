@@ -317,7 +317,7 @@ function AdminPage() {
 
         const removeRoom = async () => {
             const response = await fetch(
-                `http://localhost:8080/catalog/remove-rooms?token=${token}&hotelId=${hotelId}`, {
+                `http://localhost:8080/catalog/remove-hotel?token=${token}&hotelId=${hotelId}`, {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",

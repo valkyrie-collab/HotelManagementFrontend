@@ -42,7 +42,7 @@ function HomePage() {
         if (event === "sign") {
             navigate("/sign-page")
         } else {
-            navigate(`/user-profile`)
+            navigate(`/profile-dashboard`)
         }
 
     }

@@ -13,12 +13,13 @@ function App() {
   return(
     <Router>
       <Routes>
-        <Route path='/' element={<ProfilePage/>}/>
+        <Route path='/' element={<HomePage/>}/>
         <Route path='/hotel-details/:hotelId' element={<HotelDetailPage/>}/>
         <Route path='/sign-page' element={<SignInPage/>}/>
         <Route path='/user-profile' element={<UserProfilePage/>}/>
         <Route path='/admin-page' element={<AdminPage/>}/>
         <Route path='/room-service/:hotelId' element={<RoomPage/>}/>
+        <Route path='/profile-dashboard' element={<ProfilePage/>}/>
       </Routes>
     </Router>
   );
