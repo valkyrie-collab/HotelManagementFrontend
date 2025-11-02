@@ -60,7 +60,7 @@ function HotelDetailPage() {
     }
 
     const handleRoomNavigation = () => {
-        navigate(`/room-service/${hotelId}`);
+        navigate(`/room-service/${hotelId}/${hotel.name}`);
     }
 
     const scrollRef = useRef(null);
