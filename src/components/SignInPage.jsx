@@ -117,6 +117,7 @@ function SignInPage() {
                     const data = await response.text();
                     alert(data);
                     setIsSignIn(true);
+                    localStorage.setItem("username", userData.username);
                     // console.log(data);
                 } else {
                     alert("Sign in error")

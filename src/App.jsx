@@ -21,7 +21,7 @@ function App() {
         <Route path='/admin-page' element={<AdminPage/>}/>
         <Route path='/room-service/:hotelId/:hotelName' element={<RoomPage/>}/>
         <Route path='/profile-dashboard' element={<ProfilePage/>}/>
-        <Route path='/reservation-path/:roomNumber/:hotelName/:perNightCost' element={<ReservationPage />}/>
+        <Route path='/reservation-path/:roomNumber/:hotelName/:perNightCost/:doingReservation/:hotelId' element={<ReservationPage />}/>
       </Routes>
     </Router>
   );

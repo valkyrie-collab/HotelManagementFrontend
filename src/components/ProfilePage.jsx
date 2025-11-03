@@ -17,11 +17,14 @@ function ProfilePage() {
     const [isEditing, setIsEditing] = useState(true);
     const navigate = useNavigate();
     const changeProfilePicture = useRef(null);
-    const [isPasswordChangeOrAccount, setIsPasswordChangeOrAccount] = useState(true);
+    const [isPasswordChange, setIsPasswordChange] = useState(false);
+    const [isAccountChange, setIsAccountChange] = useState(true);
+    const [isShowReservations, setIsShowReservations] = useState(false);
     const updateReference = useRef(null);
     const passwordReference = useRef(null);
     const [isPasswordVisible, setIsPasswordVisible] = useState([false, false, false]);
     const [sendImage, setSendImage] = useState(null);
+    const [reservations, setReservations] = useState([]);
 
     useEffect(
         () => {
@@ -188,14 +191,11 @@ function ProfilePage() {
 
     }
 
-    const handlePasswordOrAccount = (value) => {
-        setIsPasswordChangeOrAccount(value);
-    }
-
     const handlePasswordChange = (event) => {
         event.preventDefault();
         const userFormData = new FormData(event.target);
         const username = userFormData.get("id");
+
         const oldPassword = userFormData.get("initialPassword");
         const newPassword = userFormData.get("newPassword");
         const confirmNewPassword = userFormData.get("confirmPassword");
@@ -289,6 +289,36 @@ function ProfilePage() {
         }
     }
 
+    //Need to show reservation from account
+    const handleShowReservations = () => {
+
+        if (token !== null) {
+            const fetchAllReservations = async () => {
+                const response = await fetch (`http://localhost:8080/reservation/get-all-user-reservation`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                    setReservations(data);
+                } else {
+                    console.log("Server error");
+                }
+
+            }
+
+            fetchAllReservations();
+        } else {
+            alert("No token found Sign in again.......");
+        }
+
+    }
+
     return (
         <section
             className="fixed inset-0 bg-[url('./components/assets/background.png')] bg-cover bg-center
@@ -305,7 +335,7 @@ function ProfilePage() {
                         className="rounded-[50%] w-[70%] h-[90%] object-cover"
                     />
                 </div>
-                <div className="m-7 flex flex-col gap-7 w-[80%]">
+                <div className="m-7 flex flex-col gap-5 w-[80%]">
                     {!isEditing && (
                         <div>
                             <a
@@ -327,7 +357,7 @@ function ProfilePage() {
                         </div>
                     )}
                     <a 
-                        onClick={() => handlePasswordOrAccount(true)}
+                        onClick={() => {setIsAccountChange(true); setIsPasswordChange(false); setIsShowReservations(false);}}
                         className="rounded-3xl bg-green-500/15 backdrop-blur-lg border border-green-500/30
                             shadow-xl hover:bg-green-600/25 cursor-pointer p-2 flex justify-center
                             transition-all duration-300 ease-in-out"
@@ -335,12 +365,20 @@ function ProfilePage() {
                             <span className="text-lg font-bold text-green-700">Account Settings</span>
                     </a>
                     <a
-                        onClick={() => handlePasswordOrAccount(false)}
+                        onClick={() => {setIsAccountChange(false); setIsPasswordChange(true); setIsShowReservations(false);}}
                         className="rounded-3xl bg-blue-500/25 backdrop-blur-lg border border-blue-500/60
                             shadow-xl hover:bg-blue-600/30 cursor-pointer p-2 flex justify-center 
                             transition-all duration-300 ease-in-out"
                     >
                         <span className="text-lg font-bold text-blue-700">Change Password</span>
+                    </a>
+                    <a
+                        onClick={() => {setIsAccountChange(false); setIsPasswordChange(false); setIsShowReservations(true)}}
+                        className="rounded-3xl bg-red-500/25 backdrop-blur-lg border border-red-500/60
+                            shadow-xl hover:bg-red-600/30 cursor-pointer p-2 flex justify-center
+                            transition-all duration-300 ease-in-out"
+                    >
+                        <span className="text-lg font-bold text-red-700">Reservations</span>
                     </a>
                     <a
                         onClick={handleLogout}
@@ -352,7 +390,7 @@ function ProfilePage() {
                     </a>
                 </div>
             </div>
-            {isPasswordChangeOrAccount? (
+            {isAccountChange && (
                 <div
                 className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl
                     p-10 w-[70%] h-[90%] ml-2 mt-10 mr-10"
@@ -520,7 +558,9 @@ function ProfilePage() {
                     </div>
                 </form>
             </div>
-            ) : (
+            )} 
+            
+            {!isPasswordChange && (
                 <div
                 className="rounded-2xl bg-white/15 backdrop-blur-lg border border-white/30 shadow-xl
                     p-10 w-[70%] h-[90%] ml-2 mt-10 mr-10"
@@ -661,6 +701,7 @@ function ProfilePage() {
                 </form>
             </div>
             )}
+            {isShowReservations && (<div></div>)}
             
         </section>
     )

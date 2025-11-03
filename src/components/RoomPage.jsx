@@ -61,7 +61,7 @@ function RoomPage() {
     }
 
     const handleReserveRoom = (index) => {
-        navigate(`/reservation-path/${btoa(rooms[index].roomNumber.toString())}/${btoa(hotelName)}/${btoa(rooms[index].price.toString())}`)
+        navigate(`/reservation-path/${btoa(rooms[index].roomNumber.toString())}/${btoa(hotelName)}/${btoa(rooms[index].price.toString())}/${true}/${btoa(rooms[index].id)}/${hotelId}`)
     }   
 
     return(
